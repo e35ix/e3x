@@ -13,8 +13,8 @@ import { deepSeekModels } from "@/lib/deepseek-ai"
 const CONFIG_MODELS = {
   "drx_chat": { provider: "deepseek", modelId: deepSeekModels["deepseek-chat"] },
   "drx_r1": { provider: "openai", modelId: openAIModels["gpt-5"] },
-  "drx_advanced": { provider: "together", modelId: togetherModels["llama3-70b"] },
-  "drx_designer": { provider: "groq", modelId: groqModels["mixtral"] },
+  "drx_advanced": { provider: "together", modelId: togetherModels["llama3-70b"] }, // تم تصحيح اسم النموذج في together-ai.ts
+  "drx_designer": { provider: "groq", modelId: groqModels["mixtral"] }, // تم تصحيح اسم النموذج في groq-ai.ts
 }
 
 export async function POST(request: NextRequest) {

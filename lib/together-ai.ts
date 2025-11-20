@@ -10,7 +10,7 @@ export const getTogetherAI = () => {
 
   return new Together({
     apiKey,
-    baseURL: process.env.DRX_ADVANCED_BASE_URL || "https://api.together.xyz/v1", // استخدام BASE_URL الجديد
+    baseURL: process.env.DRX_ADVANCED_BASE_URL || "https://api.together.ai/v1", // تصحيح BASE_URL لـ Together AI
   });
 };
 

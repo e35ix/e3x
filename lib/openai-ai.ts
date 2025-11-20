@@ -10,7 +10,7 @@ export const getOpenAI = () => {
 
   return new OpenAI({
     apiKey,
-    baseURL: process.env.DRX_R1_BASE_URL || "https://api.openai.com/v1/responses", // استخدام BASE_URL الجديد
+    baseURL: process.env.DRX_R1_BASE_URL || "https://api.openai.com/v1", // تصحيح BASE_URL لـ OpenAI
   });
 };
 

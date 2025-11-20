@@ -10,7 +10,7 @@ export const getGroqAI = () => {
 
   return new Groq({
     apiKey,
-    baseURL: process.env.DRX_DESIGNER_BASE_URL || "https://api.groq.com/openai/v1", // استخدام BASE_URL الجديد
+    baseURL: process.env.DRX_DESIGNER_BASE_URL || "https://api.groq.com/openai/v1", // تأكيد BASE_URL لـ Groq
   })
 }
 
