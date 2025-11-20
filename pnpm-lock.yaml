@@ -140,6 +140,9 @@ importers:
       next-themes:
         specifier: ^0.4.4
         version: 0.4.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      openai:
+        specifier: ^6.9.1
+        version: 6.9.1(ws@8.18.3)(zod@3.25.76)
       path:
         specifier: latest
         version: 0.12.7
@@ -1668,6 +1671,18 @@ packages:
   object-stream@0.0.1:
     resolution: {integrity: sha512-+NPJnRvX9RDMRY9mOWOo/NDppBjbZhXirNNSu2IBnuNboClC9h1ZGHXgHBLDbJMHsxeJDq922aVmG5xs24a/cA==}
     engines: {node: '>=0.10'}
+
+  openai@6.9.1:
+    resolution: {integrity: sha512-vQ5Rlt0ZgB3/BNmTa7bIijYFhz3YBceAA3Z4JuoMSBftBF9YqFHIEhZakSs+O/Ad7EaoEimZvHxD5ylRjN11Lg==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
 
   parquetjs@0.11.2:
     resolution: {integrity: sha512-Y6FOc3Oi2AxY4TzJPz7fhICCR8tQNL3p+2xGQoUAMbmlJBR7+JJmMrwuyMjIpDiM7G8Wj/8oqOH4UDUmu4I5ZA==}
@@ -3537,6 +3552,11 @@ snapshots:
   object-hash@3.0.0: {}
 
   object-stream@0.0.1: {}
+
+  openai@6.9.1(ws@8.18.3)(zod@3.25.76):
+    optionalDependencies:
+      ws: 8.18.3
+      zod: 3.25.76
 
   parquetjs@0.11.2:
     dependencies:

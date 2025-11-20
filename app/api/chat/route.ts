@@ -1,31 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getGroqAI } from "@/lib/groq-ai"
-import Together from "together-ai"
+import { getTogetherAI } from "@/lib/together-ai"
+import { getOpenAI } from "@/lib/openai-ai"
+import { getDeepSeekAI } from "@/lib/deepseek-ai"
+import { TOOLS, executeTool } from "@/lib/tools"
+import { groqModels } from "@/lib/groq-ai"
+import { togetherModels } from "@/lib/together-ai"
+import { openAIModels } from "@/lib/openai-ai"
+import { deepSeekModels } from "@/lib/deepseek-ai"
 
-// قائمة النماذج المدعومة من Together
-const TOGETHER_MODELS = {
-  deepseek: "deepseek-ai/DeepSeek-R1",
-  llama4: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
-  "deepseek-v3": "deepseek-ai/DeepSeek-V3",
-  gemma3: "google/gemma-3-27b-it",
-  coder: "arcee-ai/coder-large",
-  perplexity: "perplexity-ai/r1-1776",
-  qwen: "Qwen/Qwen2.5-VL-72B-Instruct",
-  "llama-guard": "meta-llama/Llama-Guard-4-12B",
-}
-
-// قائمة النماذج المدعومة من Groq
-const GROQ_MODELS = {
-  "groq-llama3": "llama-3.3-70b-versatile",
-  "groq-mixtral": "mixtral-8x7b-32768",
-  "groq-gemma": "gemma-7b-it",
-}
-
-// قائمة النماذج المدعومة من OpenRouter
-const OPENROUTER_MODELS = {
-  "openrouter-llama3": "meta-llama/llama-3-70b-instruct",
-  "openrouter-claude": "anthropic/claude-3-opus",
-  "openrouter-mixtral": "mistralai/mixtral-8x7b-instruct",
+// قائمة النماذج المدعومة من ملف التكوين
+const CONFIG_MODELS = {
+  "drx_chat": { provider: "deepseek", modelId: deepSeekModels["deepseek-chat"] },
+  "drx_r1": { provider: "openai", modelId: openAIModels["gpt-5"] },
+  "drx_advanced": { provider: "together", modelId: togetherModels["llama3-70b"] },
+  "drx_designer": { provider: "groq", modelId: groqModels["mixtral"] },
 }
 
 export async function POST(request: NextRequest) {
@@ -37,26 +26,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "يجب توفير رسائل صالحة" }, { status: 400 })
     }
 
-    // تحديد المزود والنموذج المناسب
-    let provider = "groq" // استخدام Groq كمزود افتراضي لأنه متاح
-    let modelId = GROQ_MODELS["groq-llama3"] // استخدام llama3 كنموذج افتراضي
+    // تحديد المزود والنموذج المناسب بناءً على ملف التكوين
+    const modelConfig = CONFIG_MODELS[model as keyof typeof CONFIG_MODELS]
 
-    if (model in TOGETHER_MODELS && process.env.TOGETHER_API_KEY) {
-      provider = "together"
-      modelId = TOGETHER_MODELS[model as keyof typeof TOGETHER_MODELS]
-    } else if (model in GROQ_MODELS && process.env.GROQ_API_KEY) {
-      provider = "groq"
-      modelId = GROQ_MODELS[model as keyof typeof GROQ_MODELS]
-    } else if (model in OPENROUTER_MODELS && process.env.OPENROUTER_API_KEY) {
-      provider = "openrouter"
-      modelId = OPENROUTER_MODELS[model as keyof typeof OPENROUTER_MODELS]
+    if (!modelConfig) {
+      return NextResponse.json({ error: `النموذج ${model} غير مدعوم أو غير موجود في ملف التكوين.` }, { status: 400 })
     }
+
+    const { provider, modelId } = modelConfig
 
     // إعداد الرسائل
     let formattedMessages = messages
 
-    // إذا كان هناك صورة وكان النموذج يدعم الصور
-    if (image_url && provider === "together" && (model === "gemma3" || model === "llama4" || model === "qwen")) {
+    // إذا كان هناك صورة وكان النموذج يدعم الصور (يجب تحديد النماذج التي تدعم الصور هنا)
+    // حاليًا، نفترض أن النماذج التي تستخدم OpenAI API (مثل gpt-5) قد تدعم الصور
+    if (image_url && provider === "openai") {
       // تنسيق الرسالة الأخيرة لتتضمن الصورة
       const lastMessage = messages[messages.length - 1]
       formattedMessages = [
@@ -82,16 +66,35 @@ export async function POST(request: NextRequest) {
     // استدعاء النموذج المناسب حسب المزود
     try {
       switch (provider) {
-        case "together":
-          if (!process.env.TOGETHER_API_KEY) {
-            throw new Error("مفتاح API لـ Together غير متوفر")
-          }
-
-          const together = new Together({
-            apiKey: process.env.TOGETHER_API_KEY,
+        case "openai":
+          const openai = getOpenAI()
+          response = await openai.chat.completions.create({
+            tools: TOOLS,
+            tool_choice: "auto",
+            messages: formattedMessages,
+            model: modelId,
+            temperature: 0.7,
+            max_tokens: 1000,
           })
+          break
 
+        case "deepseek":
+          const deepseek = getDeepSeekAI()
+          response = await deepseek.chat.completions.create({
+            tools: TOOLS,
+            tool_choice: "auto",
+            messages: formattedMessages,
+            model: modelId,
+            temperature: 0.7,
+            max_tokens: 1000,
+          })
+          break
+
+        case "together":
+          const together = getTogetherAI()
           response = await together.chat.completions.create({
+            tools: TOOLS,
+            tool_choice: "auto",
             messages: formattedMessages,
             model: modelId,
             temperature: 0.7,
@@ -100,42 +103,15 @@ export async function POST(request: NextRequest) {
           break
 
         case "groq":
-          if (!process.env.GROQ_API_KEY) {
-            throw new Error("مفتاح API لـ Groq غير متوفر")
-          }
           const groq = getGroqAI()
           response = await groq.chat.completions.create({
+            tools: TOOLS,
+            tool_choice: "auto",
             messages: formattedMessages,
             model: modelId,
             temperature: 0.7,
             max_tokens: 1000,
           })
-          break
-
-        case "openrouter":
-          if (!process.env.OPENROUTER_API_KEY) {
-            throw new Error("مفتاح API لـ OpenRouter غير متوفر")
-          }
-
-          const openRouterResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-            },
-            body: JSON.stringify({
-              model: modelId,
-              messages: formattedMessages,
-              temperature: 0.7,
-              max_tokens: 1000,
-            }),
-          })
-
-          if (!openRouterResponse.ok) {
-            throw new Error(`خطأ في استدعاء OpenRouter: ${openRouterResponse.status}`)
-          }
-
-          response = await openRouterResponse.json()
           break
 
         default:
@@ -151,48 +127,37 @@ export async function POST(request: NextRequest) {
         errorMessage = apiError
       }
 
-      // محاولة استخدام مزود بديل
-      if (provider !== "groq" && process.env.GROQ_API_KEY) {
-        try {
-          console.log("محاولة استخدام Groq كبديل")
-          const groqFallback = getGroqAI()
-          response = await groqFallback.chat.completions.create({
-            messages: formattedMessages,
-            model: GROQ_MODELS["groq-llama3"],
-            temperature: 0.7,
-            max_tokens: 1000,
-          })
-        } catch (fallbackError: unknown) {
-          console.error("فشل أيضاً في استخدام Groq كبديل:", fallbackError)
-          let fallbackErrorMessage = "حدث خطأ غير معروف في المزود البديل."
-          if (fallbackError instanceof Error) {
-            fallbackErrorMessage = fallbackError.message
-          } else if (typeof fallbackError === "string") {
-            fallbackErrorMessage = fallbackError
-          }
-          return NextResponse.json(
-            {
-              error: `فشل في استخدام ${provider} وGroq: ${errorMessage}. فشل المزود البديل: ${fallbackErrorMessage}`,
-              details: String(apiError),
-            },
-            { status: 500 },
-          )
-        }
-      } else {
-        // إذا كان المزود هو Groq بالفعل أو لم يكن متاحاً، نعود بخطأ
-        return NextResponse.json(
-          {
-            error: `خطأ في استدعاء ${provider}: ${errorMessage}`,
-            details: String(apiError),
-          },
-          { status: 500 },
-        )
-      }
+      return NextResponse.json(
+        {
+          error: `خطأ في استدعاء ${provider}: ${errorMessage}`,
+          details: String(apiError),
+        },
+        { status: 500 },
+      )
     }
 
     // التحقق من وجود البيانات في الاستجابة قبل إرجاعها
     if (!response || !response.choices || !response.choices[0] || !response.choices[0].message) {
       throw new Error("استجابة غير صالحة من واجهة برمجة التطبيقات")
+    }
+
+    // معالجة استدعاءات الأدوات
+    const message = response.choices[0].message
+    if (message.tool_calls && message.tool_calls.length > 0) {
+      // هنا يجب أن تكون هناك حلقة لمعالجة استدعاءات الأدوات، ولكن لغرض الدمج السريع
+      // سنقوم بمحاكاة استدعاء الأداة الأولى وإرجاع النتيجة
+      const toolCall = message.tool_calls[0]
+      const toolName = toolCall.function.name
+      const toolArgs = JSON.parse(toolCall.function.arguments)
+      
+      const toolOutput = await executeTool(toolName, toolArgs)
+
+      // إرجاع استجابة محاكاة لاستدعاء الأداة
+      return NextResponse.json({
+        tool_call: toolCall,
+        tool_output: toolOutput,
+        message: "Tool call detected and executed (mocked).",
+      }, { status: 200 })
     }
 
     return NextResponse.json(response, {

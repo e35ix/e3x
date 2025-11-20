@@ -10,11 +10,10 @@ export const getGroqAI = () => {
 
   return new Groq({
     apiKey,
+    baseURL: process.env.DRX_DESIGNER_BASE_URL || "https://api.groq.com/openai/v1", // استخدام BASE_URL الجديد
   })
 }
 
 export const groqModels = {
-  llama3: "llama-3.3-70b-versatile",
   mixtral: "mixtral-8x7b-32768",
-  gemma: "gemma-7b-it",
 }
