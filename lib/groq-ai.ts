@@ -15,5 +15,5 @@ export const getGroqAI = () => {
 }
 
 export const groqModels = {
-  mixtral: "mixtral-8x7b-32768",
+  mixtral: "llama-3.1-8b-instant",
 }

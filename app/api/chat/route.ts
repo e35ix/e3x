@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
           break
 
         case "deepseek":
+          // DeepSeek API يستخدم تنسيق OpenAI لكن نقطة النهاية مختلفة
           const deepseek = getDeepSeekAI()
           response = await deepseek.chat.completions.create({
             tools: TOOLS,
@@ -91,6 +92,7 @@ export async function POST(request: NextRequest) {
           break
 
         case "together":
+          // Together API يستخدم تنسيق OpenAI لكن نقطة النهاية مختلفة
           const together = getTogetherAI()
           response = await together.chat.completions.create({
             tools: TOOLS,

@@ -10,7 +10,7 @@ export const getDeepSeekAI = () => {
 
   return new OpenAI({
     apiKey,
-    baseURL: process.env.DRX_CHAT_BASE_URL || "https://api.deepseek.com/v1", // استخدام BASE_URL الجديد
+    baseURL: process.env.DRX_CHAT_BASE_URL || "https://api.deepseek.com/chat/completions", // استخدام BASE_URL الجديد
   });
 };
 

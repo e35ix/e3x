@@ -15,5 +15,5 @@ export const getTogetherAI = () => {
 };
 
 export const togetherModels = {
-  "llama3-70b": "meta-llama/Llama-3-70b-chat-hf",
+  "llama3-70b": "moonshotai/Kimi-K2-Thinking",
 };
