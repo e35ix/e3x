@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 7%;
+  --foreground: 0 0% 98%;
+
+  --card: 0 0% 10%;
+  --card-foreground: 0 0% 98%;
+
+  --popover: 0 0% 10%;
+  --popover-foreground: 0 0% 98%;
+
+  --primary: 0 73% 41%;
+  --primary-foreground: 0 0% 98%;
+
+  --secondary: 0 0% 13%;
+  --secondary-foreground: 0 0% 98%;
+
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 65%;
+
+  --accent: 0 73% 41%;
+  --accent-foreground: 0 0% 98%;
+
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 0 0% 15%;
+  --input: 0 0% 15%;
+  --ring: 0 73% 41%;
+
+  --radius: 0.5rem;
+
+  --sidebar-background: 0 0% 10%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 0 73% 41%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 0 0% 15%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 0 0% 15%;
+  --sidebar-ring: 0 73% 41%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* تخصيص التوجيه من اليمين إلى اليسار للغة العربية */
+html {
+  direction: rtl;
+}
+
+/* تخصيص الخطوط للغة العربية */
+@font-face {
+  font-family: "Cairo";
+  src: url("/fonts/Cairo-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Cairo";
+  src: url("/fonts/Cairo-Bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+body {
+  font-family: "Cairo", sans-serif;
+}
+
+/* تخصيص أنماط إضافية */
+.cyberai-gradient {
+  background: linear-gradient(90deg, #c41e3a 0%, #8b0000 100%);
+}
+
+.feature-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.model-card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.model-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.nav-link {
+  position: relative;
+}
+
+.nav-link.active {
+  color: rgb(var(--primary));
+}
+
+.nav-link.active::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: rgb(var(--primary));
+}
