@@ -1,127 +1,85 @@
 "use client"
-import { Check, Info, AlertTriangle, BookOpen } from "lucide-react"
+import { Check, Info, AlertTriangle, BookOpen, Copy } from "lucide-react"
+import ReactMarkdown from "react-markdown"
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
+import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism"
+import { Button } from "./ui/button"
+import { useToast } from "./ui/use-toast"
 
 interface FormattedResponseProps {
   content: string
 }
 
 export function FormattedResponse({ content }: FormattedResponseProps) {
-  // تحويل النص إلى محتوى منسق بشكل جذاب
-  const formatContent = () => {
-    // تنظيف النص من علامات النجمة المزدوجة
-    const cleanedContent = content.replace(/\*\*(.*?)\*\*/g, "$1")
+  const { toast } = useToast()
 
-    // تقسيم المحتوى إلى فقرات
-    const paragraphs = cleanedContent.split("\n\n").filter((p) => p.trim().length > 0)
+  const CodeBlock = ({ node, inline, className, children, ...props }: any) => {
+    const match = /language-(\w+)/.exec(className || "")
+    const code = String(children).replace(/\n$/, "")
+    const language = match ? match[1] : "text"
 
-    return (
-      <div className="space-y-4">
-        {paragraphs.map((paragraph, index) => {
-          // التعامل مع العناوين
-          if (paragraph.match(/^#+\s/)) {
-            const level = (paragraph.match(/^(#+)\s/) || ["", "#"])[1].length
-            const title = paragraph.replace(/^#+\s/, "")
+    const handleCopy = () => {
+      navigator.clipboard.writeText(code)
+      toast({
+        title: "تم النسخ",
+        description: "تم نسخ الكود إلى الحافظة.",
+      })
+    }
 
-            if (level === 1) {
-              return (
-                <div key={index} className="bg-gradient-to-r from-zinc-800 to-zinc-900 p-3 rounded-lg mb-4">
-                  <h2 className="text-xl font-bold text-white">{title}</h2>
-                </div>
-              )
-            } else {
-              return (
-                <h3 key={index} className="text-lg font-semibold text-blue-400 mt-4 mb-2">
-                  {title}
-                </h3>
-              )
-            }
-          }
-
-          // التعامل مع القوائم المرقمة
-          if (paragraph.match(/^\d+\.\s/)) {
-            const items = paragraph.split(/\n/).filter((item) => item.match(/^\d+\.\s/))
-            return (
-              <div key={index} className="bg-zinc-900 rounded-lg p-3">
-                <ol className="list-decimal list-inside space-y-2">
-                  {items.map((item, itemIndex) => (
-                    <li key={itemIndex} className="text-gray-200">
-                      {item.replace(/^\d+\.\s/, "")}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            )
-          }
-
-          // التعامل مع القوائم النقطية
-          if (paragraph.match(/^[•-]\s/)) {
-            const items = paragraph.split(/\n/).filter((item) => item.match(/^[•-]\s/))
-            return (
-              <div key={index} className="bg-zinc-900 rounded-lg p-3">
-                <ul className="list-disc list-inside space-y-2">
-                  {items.map((item, itemIndex) => (
-                    <li key={itemIndex} className="text-gray-200">
-                      {item.replace(/^[•-]\s/, "")}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )
-          }
-
-          // التعامل مع النصائح والملاحظات
-          if (paragraph.toLowerCase().includes("ملاحظة:") || paragraph.toLowerCase().includes("نصيحة:")) {
-            return (
-              <div key={index} className="bg-blue-900/30 border border-blue-800 rounded-lg p-3 flex items-start gap-2">
-                <Info className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                <p className="text-gray-200">{paragraph}</p>
-              </div>
-            )
-          }
-
-          // التعامل مع التحذيرات
-          if (paragraph.toLowerCase().includes("تحذير:") || paragraph.toLowerCase().includes("هام:")) {
-            return (
-              <div
-                key={index}
-                className="bg-amber-900/30 border border-amber-800 rounded-lg p-3 flex items-start gap-2"
-              >
-                <AlertTriangle className="h-5 w-5 text-amber-400 mt-0.5 flex-shrink-0" />
-                <p className="text-gray-200">{paragraph}</p>
-              </div>
-            )
-          }
-
-          // التعامل مع الخطوات
-          if (paragraph.toLowerCase().includes("خطوات:") || paragraph.toLowerCase().includes("الخطوات:")) {
-            return (
-              <div key={index} className="bg-zinc-900 rounded-lg p-3 flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
-                <p className="text-gray-200">{paragraph}</p>
-              </div>
-            )
-          }
-
-          // التعامل مع المراجع
-          if (paragraph.toLowerCase().includes("مراجع:") || paragraph.toLowerCase().includes("مصادر:")) {
-            return (
-              <div key={index} className="bg-zinc-900 rounded-lg p-3 flex items-start gap-2">
-                <BookOpen className="h-5 w-5 text-purple-400 mt-0.5 flex-shrink-0" />
-                <p className="text-gray-200">{paragraph}</p>
-              </div>
-            )
-          }
-
-          // فقرة عادية
-          return (
-            <p key={index} className="text-gray-200 leading-relaxed">
-              {paragraph}
-            </p>
-          )
-        })}
+    return !inline && match ? (
+      <div className="relative my-4 rounded-lg bg-[#1e1e1e] shadow-lg">
+        <div className="flex items-center justify-between border-b border-zinc-700 p-2 text-xs text-zinc-400">
+          <span className="font-mono">{language.toUpperCase()}</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-3 text-xs text-zinc-400 hover:bg-zinc-700 hover:text-white"
+            onClick={handleCopy}
+          >
+            <Copy className="mr-1 h-3 w-3" />
+            نسخ
+          </Button>
+        </div>
+        <SyntaxHighlighter
+          style={vscDarkPlus}
+          language={language}
+          PreTag="div"
+          className="!m-0 !rounded-t-none !p-4"
+          {...props}
+        >
+          {code}
+        </SyntaxHighlighter>
       </div>
+    ) : (
+      <code className={className} {...props}>
+        {children}
+      </code>
     )
   }
 
-  return <div className="formatted-response text-sm">{formatContent()}</div>
+  const components = {
+    code: CodeBlock,
+    // يمكن إضافة مكونات أخرى هنا مثل h1, h2, ul, ol لتنسيقها
+    h1: ({ node, ...props }: any) => (
+      <h1 className="text-2xl font-bold text-white mt-6 mb-3" {...props} />
+    ),
+    h2: ({ node, ...props }: any) => (
+      <h2 className="text-xl font-semibold text-blue-400 mt-4 mb-2" {...props} />
+    ),
+    p: ({ node, ...props }: any) => (
+      <p className="text-gray-200 leading-relaxed mb-3" {...props} />
+    ),
+    ul: ({ node, ...props }: any) => (
+      <ul className="list-disc list-inside space-y-1 pl-5 mb-3" {...props} />
+    ),
+    ol: ({ node, ...props }: any) => (
+      <ol className="list-decimal list-inside space-y-1 pl-5 mb-3" {...props} />
+    ),
+  }
+
+  return (
+    <div className="formatted-response text-sm">
+      <ReactMarkdown components={components}>{content}</ReactMarkdown>
+    </div>
+  )
 }
