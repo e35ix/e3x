@@ -1,101 +1,75 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { checkLocalModelExists } from "@/lib/local-models"
 import { groqModels } from "@/lib/groq-ai"
-import { openRouterModels } from "@/lib/openrouter"
-import { xaiModels } from "@/lib/xai"
+import { togetherModels } from "@/lib/together-ai"
+import { openAIModels } from "@/lib/openai-ai"
+import { deepSeekModels } from "@/lib/deepseek-ai"
+// import { openRouterModels } from "@/lib/openrouter" // تم إزالة الاستيراد غير المستخدم
+// import { xaiModels } from "@/lib/xai" // تم إزالة الاستيراد غير المستخدم
 
 export async function GET(request: NextRequest) {
   try {
     // قائمة النماذج المتاحة
     const availableModels = []
 
-    // إضافة نماذج Groq إذا كان مفتاح API متاحاً
-    if (process.env.GROQ_API_KEY) {
-      Object.entries(groqModels).forEach(([key, value]) => {
-        availableModels.push({
-          id: `groq-${key}`,
-          name: `${key.charAt(0).toUpperCase() + key.slice(1)} (Groq)`,
-          description: `نموذج ${key} بسرعة فائقة من Groq`,
-          type: "cloud",
-          provider: "groq",
-          icon: "GQ",
-          color: "#8e44ad",
-          apiId: value,
-          multimodal: false,
-        })
+    // تعريف النماذج الجديدة بناءً على ملف التكوين (dr.x models)
+    // drx_chat (DeepSeek)
+    if (process.env.DEEPSEEK_API_KEY) {
+      availableModels.push({
+        id: "drx_chat",
+        name: "dr.x Chat (DeepSeek)",
+        description: "النموذج الأساسي للمحادثات اليومية",
+        type: "cloud",
+        provider: "deepseek",
+        icon: "DS",
+        color: "#2196f3",
+        apiId: deepSeekModels["deepseek-chat"],
+        multimodal: false,
       })
     }
 
-    // إضافة نماذج Together إذا كان مفتاح API متاحاً
+    // drx_r1 (OpenAI)
+    if (process.env.OPENAI_API_KEY) {
+      availableModels.push({
+        id: "drx_r1",
+        name: "dr.x R1 (GPT-5)",
+        description: "النموذج المتقدم للتفكير المعقد",
+        type: "cloud",
+        provider: "openai",
+        icon: "GPT",
+        color: "#673ab7",
+        apiId: openAIModels["gpt-5"],
+        multimodal: true, // نفترض دعم الوسائط المتعددة لـ GPT-5
+      })
+    }
+
+    // drx_advanced (Together AI / Llama 3 70B)
     if (process.env.TOGETHER_API_KEY) {
-      availableModels.push(
-        {
-          id: "deepseek",
-          name: "DeepSeek-R1",
-          description: "نموذج متقدم للمهام المعقدة",
-          type: "cloud",
-          provider: "together",
-          icon: "DS",
-          color: "#2196f3",
-          apiId: "deepseek-ai/DeepSeek-R1",
-          multimodal: false,
-        },
-        {
-          id: "llama4",
-          name: "Llama-4-Maverick-17B",
-          description: "نموذج متعدد الوسائط من Meta",
-          type: "cloud",
-          provider: "together",
-          icon: "LL",
-          color: "#4caf50",
-          apiId: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
-          multimodal: true,
-        },
-        {
-          id: "gemma3",
-          name: "Gemma-3-27B",
-          description: "نموذج متعدد الوسائط من Google",
-          type: "cloud",
-          provider: "together",
-          icon: "GM",
-          color: "#ff9800",
-          apiId: "google/gemma-3-27b-it",
-          multimodal: true,
-        },
-      )
-    }
-
-    // إضافة نماذج OpenRouter إذا كان مفتاح API متاحاً
-    if (process.env.OPENROUTER_API_KEY) {
-      Object.entries(openRouterModels).forEach(([key, value]) => {
-        availableModels.push({
-          id: `openrouter-${key}`,
-          name: `${key.charAt(0).toUpperCase() + key.slice(1)} (OpenRouter)`,
-          description: `نموذج ${key} من OpenRouter`,
-          type: "cloud",
-          provider: "openrouter",
-          icon: "OR",
-          color: "#e91e63",
-          apiId: value,
-          multimodal: key.includes("claude") || key.includes("llama3"),
-        })
+      availableModels.push({
+        id: "drx_advanced",
+        name: "dr.x Advanced (Llama 3 70B)",
+        description: "النموذج المتقدم للمعالجة المتوازية",
+        type: "cloud",
+        provider: "together",
+        icon: "LL",
+        color: "#4caf50",
+        apiId: togetherModels["llama3-70b"],
+        multimodal: false,
       })
     }
 
-    // إضافة نماذج XAI إذا كان مفتاح API متاحاً
-    if (process.env.XAI_API_KEY) {
-      Object.entries(xaiModels).forEach(([key, value]) => {
-        availableModels.push({
-          id: `xai-${key}`,
-          name: `${key.charAt(0).toUpperCase() + key.slice(1)} (XAI)`,
-          description: `نموذج ${key} من XAI`,
-          type: "cloud",
-          provider: "xai",
-          icon: "XA",
-          color: "#009688",
-          apiId: value,
-          multimodal: false,
-        })
+    // drx_designer (Groq / Mixtral)
+    if (process.env.GROQ_API_KEY) {
+      availableModels.push({
+        id: "drx_designer",
+        name: "dr.x Designer (Mixtral)",
+        description: "النموذج المختص بالتصميم والإبداع",
+        type: "cloud",
+        provider: "groq",
+        icon: "GQ",
+        color: "#8e44ad",
+        apiId: groqModels["mixtral"],
+        multimodal: false,
       })
     }
 
