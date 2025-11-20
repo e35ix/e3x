@@ -8,19 +8,10 @@ export class MindMapGenerator {
    * إنشاء خريطة ذهنية
    */
   async generateMindMap(query: string, response: string): Promise<void> {
-    console.log("إنشاء خريطة ذهنية للاستعلام:", query)
-
-    // في التطبيق الحقيقي، هنا سيتم تحليل الاستجابة واستخراج العناصر الرئيسية
-    // ثم إنشاء خريطة ذهنية باستخدام مكتبة مثل vis.js أو d3.js
-
-    // محاكاة إنشاء الخريطة الذهنية
-    this.simulateGeneratingMindMap(query, response)
-  }
-
-  /**
-   * محاكاة إنشاء خريطة ذهنية
-   */
-  private simulateGeneratingMindMap(query: string, response: string): void {
+    // يجب استبدال هذه الدالة بالتكامل الفعلي مع مكتبة توليد خرائط ذهنية
+    console.log(`[TODO] تكامل الخرائط الذهنية: محاكاة إنشاء خريطة ذهنية للاستعلام:`, query)
+    // هنا يجب أن يكون الكود الفعلي للتكامل
+    
     // استخراج العناوين الرئيسية من الاستجابة
     const mainTopics = this.extractMainTopics(response)
 
@@ -30,26 +21,6 @@ export class MindMapGenerator {
     // في التطبيق الحقيقي، هنا سيتم إنشاء الخريطة الذهنية
     console.log("العناوين الرئيسية:", mainTopics)
     console.log("العناوين الفرعية:", subTopics)
-
-    // إنشاء بيانات الخريطة الذهنية
-    const mindMapData = {
-      root: {
-        text: query,
-        children: mainTopics.map((topic, index) => ({
-          text: topic,
-          children: subTopics
-            .filter((_, i) => i % mainTopics.length === index)
-            .map((subTopic) => ({
-              text: subTopic,
-            })),
-        })),
-      },
-    }
-
-    // حفظ بيانات الخريطة الذهنية في التخزين المحلي
-    if (typeof window !== "undefined") {
-      localStorage.setItem("mindMapData", JSON.stringify(mindMapData))
-    }
   }
 
   /**

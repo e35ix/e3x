@@ -69,6 +69,14 @@ const SidebarProvider = React.forwardRef<
   ) => {
     const isMobile = useIsMobile()
     const [openMobile, setOpenMobile] = React.useState(false)
+  const pathname = usePathname()
+
+  // إغلاق الشريط الجانبي في وضع الهاتف عند تغيير المسار
+  React.useEffect(() => {
+    if (isMobile && openMobile) {
+      setOpenMobile(false)
+    }
+  }, [pathname, isMobile, openMobile])
 
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.

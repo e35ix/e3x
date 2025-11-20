@@ -5,7 +5,8 @@ export const getGroqAI = () => {
   const apiKey = process.env.GROQ_API_KEY
 
   if (!apiKey) {
-    throw new Error("مفتاح API لـ Groq غير موجود")
+    console.error("مفتاح API لـ Groq غير موجود. لن يتم تفعيل نماذج Groq.")
+    return null // إرجاع قيمة null بدلاً من رمي خطأ
   }
 
   return new Groq({
