@@ -79,14 +79,7 @@ export function AppSidebar() {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive("/images")}>
-              <Link href="/images">
-                <ImageIcon className="h-5 w-5" />
-                <span>الصور</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/documents")}>
               <Link href="/documents">
