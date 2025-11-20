@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Bot, Send, User, ImageIcon, Paperclip, Trash, AlertCircle } from "lucide-react"
+import { Bot, Send, User, ImageIcon, Paperclip, Trash, AlertCircle, Settings } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { cn } from "@/lib/utils"
+import { SettingsDrawer } from "@/components/settings-drawer"
 
 // استخدام uuid لإنشاء معرفات فريدة
 function generateId() {
@@ -282,55 +283,25 @@ const ChatPage = () => {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* الشريط الجانبي للمحادثات */}
-      <div className="w-64 bg-card border-l border-border overflow-y-auto hidden md:block">
-        <div className="p-4">
-          <Button onClick={handleNewConversation} className="w-full mb-4">
-            محادثة جديدة
-          </Button>
-          <div className="space-y-2">
-            {conversations.map((conv) => (
-              <Button
-                key={conv.id}
-                variant={currentConversation?.id === conv.id ? "secondary" : "ghost"}
-                className="w-full justify-start text-right"
-                onClick={() => setCurrentConversation(conv)}
-              >
-                <span className="truncate">{conv.title}</span>
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
+    <div className="flex flex-col h-screen overflow-hidden">
+      {/* تم إزالة الشريط الجانبي للمحادثات لتبسيط الواجهة */}
 
       {/* منطقة المحادثة الرئيسية */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
-        {/* رأس المحادثة */}
-        <div className="bg-card border-b border-border p-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Select value={selectedModel} onValueChange={setSelectedModel}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="اختر النموذج" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableModels.map((model) => (
-                  <SelectItem key={model.id} value={model.id} disabled={!model.working && model.id !== "groq-llama3"}>
-                    <div className="flex items-center gap-2">
-                      <span>{model.name}</span>
-                      {!model.working && model.id !== "groq-llama3" && (
-                        <span className="text-xs text-red-500">(غير متاح)</span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Button variant="ghost" size="icon" onClick={handleClearConversation} title="مسح المحادثة">
-            <Trash className="h-5 w-5" />
-          </Button>
-        </div>
+	      <div className="flex-1 flex flex-col h-full overflow-hidden max-w-4xl mx-auto w-full">
+	        {/* رأس المحادثة - تم تبسيطه ليناسب التصميم الجديد */}
+	        <div className="bg-card border-b border-border p-4 flex justify-between items-center shrink-0">
+	          <div className="flex items-center gap-2">
+	            <Button onClick={handleNewConversation} variant="ghost" className="text-lg font-semibold">
+	              محادثة جديدة
+	            </Button>
+	          </div>
+	          <div className="flex items-center gap-2">
+	            <Button variant="ghost" size="icon" onClick={handleClearConversation} title="مسح المحادثة">
+	              <Trash className="h-5 w-5" />
+	            </Button>
+	            {/* سيتم نقل اختيار النموذج والإعدادات إلى شاشة منفصلة */}
+	          </div>
+	        </div>
 
         {/* منطقة الرسائل */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -402,27 +373,42 @@ const ChatPage = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* نموذج الإدخال */}
-        <div className="p-4 border-t border-border bg-card">
-          <form onSubmit={handleSendMessage} className="flex gap-2">
-            <Button type="button" variant="ghost" size="icon" title="إرفاق صورة">
-              <ImageIcon className="h-5 w-5" />
-            </Button>
-            <Button type="button" variant="ghost" size="icon" title="إرفاق ملف">
-              <Paperclip className="h-5 w-5" />
-            </Button>
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="اكتب رسالتك هنا..."
-              className="flex-1"
-              disabled={isLoading}
-            />
-            <Button type="submit" size="icon" disabled={!input.trim() || isLoading}>
-              <Send className="h-5 w-5" />
-            </Button>
-          </form>
-        </div>
+	        {/* نموذج الإدخال المتقدم */}
+	        <div className="p-4 border-t border-border bg-card shrink-0">
+	          <form onSubmit={handleSendMessage} className="flex items-end gap-2">
+	            {/* زر الإعدادات/القدرات */}
+	            <SettingsDrawer
+	              availableModels={availableModels}
+	              selectedModel={selectedModel}
+	              setSelectedModel={setSelectedModel}
+	            />
+	
+	            {/* زر إرفاق الملفات */}
+	            <Button type="button" variant="ghost" size="icon" title="إرفاق ملفات">
+	              <Paperclip className="h-5 w-5" />
+	            </Button>
+	
+	            {/* حقل الإدخال */}
+	            <div className="relative flex-1">
+	              <Input
+	                value={input}
+	                onChange={(e) => setInput(e.target.value)}
+	                placeholder="اكتب رسالتك هنا..."
+	                className="w-full pr-10"
+	                disabled={isLoading}
+	              />
+	              {/* زر الإرسال داخل حقل الإدخال */}
+	              <Button
+	                type="submit"
+	                size="icon"
+	                className="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8"
+	                disabled={!input.trim() || isLoading}
+	              >
+	                <Send className="h-4 w-4" />
+	              </Button>
+	            </div>
+	          </form>
+	        </div>
       </div>
     </div>
   )

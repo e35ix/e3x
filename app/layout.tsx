@@ -27,8 +27,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <SidebarProvider>
-            <div className="flex min-h-screen">
-              <AppSidebar />
+            <div className="flex min-h-screen"> {/* تم إزالة الشريط الجانبي الثابت */}
+              {/* <AppSidebar /> تم إزالته بناءً على طلب المستخدم لتحسين واجهة المحادثة */}
               <main className="flex-1">
                 <ErrorBoundary>
                   <NotificationServiceProvider>
